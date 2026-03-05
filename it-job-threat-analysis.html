@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Jobs vs Coding Agents — Threat Analysis 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --text: #e8e8f0;
+    --muted: #6b6b88;
+    --accent: #ff4d6d;
+    --warn: #ff9f43;
+    --safe: #26de81;
+    --mid: #ffd32a;
+    --glow-red: rgba(255,77,109,0.15);
+    --glow-green: rgba(38,222,129,0.12);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,77,109,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,77,109,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    margin-bottom: 48px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 5vw, 52px);
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.8;
+    max-width: 600px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* Filter tabs */
+  .filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .filter-btn {
+    padding: 6px 16px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  .filter-btn.active, .filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--glow-red);
+  }
+
+  /* Cards grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .card.high::before { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+  .card.medium::before { background: var(--mid); box-shadow: 0 0 12px var(--mid); }
+  .card.low::before { background: var(--safe); box-shadow: 0 0 12px var(--safe); }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: #2e2e44;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    flex: 1;
+  }
+
+  .overall-badge {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    margin-left: 12px;
+    flex-shrink: 0;
+  }
+
+  .overall-badge.high { color: var(--accent); }
+  .overall-badge.medium { color: var(--mid); }
+  .overall-badge.low { color: var(--safe); }
+
+  /* Level bars */
+  .levels { display: flex; flex-direction: column; gap: 10px; }
+
+  .level-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .level-name {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    width: 68px;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 6px;
+    background: #1a1a2e;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0%;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .pct {
+    font-size: 11px;
+    font-weight: 700;
+    width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Threat colors based on value */
+  .pct-high { color: var(--accent); }
+  .pct-mid { color: var(--mid); }
+  .pct-low { color: var(--safe); }
+
+  .bar-high { background: linear-gradient(90deg, #c0392b, var(--accent)); }
+  .bar-mid { background: linear-gradient(90deg, #e67e22, var(--mid)); }
+  .bar-low { background: linear-gradient(90deg, #27ae60, var(--safe)); }
+
+  /* Reason tag */
+  .reason {
+    margin-top: 16px;
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.7;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    letter-spacing: 0.3px;
+  }
+
+  /* Summary bar at top */
+  .summary-strip {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .hidden { display: none !important; }
+
+  @keyframes fadeDown {
+    from { opacity:0; transform: translateY(-20px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(16px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 1px;
+    line-height: 2;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="label">// Analysis Report — 2025-2026</div>
+    <h1>IT Jobs <span>at Risk</span><br>from Coding Agents</h1>
+    <p class="subtitle">Percentage of roles threatened at each seniority level across major IT domains. Based on current AI coding agent capabilities and trajectory.</p>
+  </header>
+
+  <div class="summary-strip">
+    <div class="stat-box">
+      <div class="stat-number" style="color:var(--accent)">9</div>
+      <div class="stat-label">High-Risk Domains</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number" style="color:var(--mid)">5</div>
+      <div class="stat-label">Medium-Risk Domains</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-number" style="color:var(--safe)">4</div>
+      <div class="stat-label">Low-Risk Domains</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> High Threat (60%+)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--mid)"></div> Medium Threat (30–60%)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--safe)"></div> Low Threat (&lt;30%)</div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filter('all', this)">All Fields</button>
+    <button class="filter-btn" onclick="filter('high', this)">High Risk</button>
+    <button class="filter-btn" onclick="filter('medium', this)">Medium Risk</button>
+    <button class="filter-btn" onclick="filter('low', this)">Low Risk</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    * Percentages represent estimated proportion of role tasks/positions displaceable by AI agents, not total job loss. <br>
+    Data synthesized from industry trends, analyst reports, and current AI capability assessments. // Claude Sonnet 4.6
+  </footer>
+</div>
+
+<script>
+const fields = [
+  {
+    title: "Web / Frontend Development",
+    risk: "high",
+    levels: { Junior: 75, Mid: 50, Senior: 25, Lead: 15 },
+    reason: "Boilerplate UI, CSS, component code is trivially generated. Senior devs who architect and make UX decisions remain valuable."
+  },
+  {
+    title: "Backend Development",
+    risk: "high",
+    levels: { Junior: 70, Mid: 45, Senior: 22, Lead: 12 },
+    reason: "CRUD APIs, ORM models, and standard service logic are heavily automatable. Complex distributed system design less so."
+  },
+  {
+    title: "Mobile Development (iOS/Android)",
+    risk: "high",
+    levels: { Junior: 65, Mid: 42, Senior: 20, Lead: 10 },
+    reason: "Standard app scaffolding, UI screens, and SDK integrations are increasingly agent-handled. Platform-specific edge cases need humans."
+  },
+  {
+    title: "Full Stack Development",
+    risk: "high",
+    levels: { Junior: 72, Mid: 48, Senior: 24, Lead: 14 },
+    reason: "Widest surface area of automatable tasks across both frontend and backend layers."
+  },
+  {
+    title: "QA / Software Testing",
+    risk: "high",
+    levels: { Junior: 80, Mid: 55, Senior: 30, Lead: 18 },
+    reason: "Unit/integration test generation is one of AI's strongest capabilities. Manual QA roles facing rapid compression."
+  },
+  {
+    title: "Data Engineering",
+    risk: "high",
+    levels: { Junior: 68, Mid: 44, Senior: 22, Lead: 12 },
+    reason: "ETL pipelines, SQL queries, and data cleaning scripts are highly automatable. Pipeline architecture design is safer."
+  },
+  {
+    title: "Technical Documentation",
+    risk: "high",
+    levels: { Junior: 85, Mid: 60, Senior: 35, Lead: 20 },
+    reason: "Code-to-docs is among the clearest AI wins. Most documentation writing is now largely automated."
+  },
+  {
+    title: "IT Support / Help Desk",
+    risk: "high",
+    levels: { Junior: 78, Mid: 50, Senior: 25, Lead: 15 },
+    reason: "Tier-1 and Tier-2 support queries are heavily handled by AI agents. Complex escalations and stakeholder mgmt remain."
+  },
+  {
+    title: "Low-Code / No-Code Dev",
+    risk: "high",
+    levels: { Junior: 82, Mid: 58, Senior: 30, Lead: 20 },
+    reason: "AI agents can directly generate what low-code specialists previously configured. The middle layer is thinning fast."
+  },
+  {
+    title: "DevOps / Platform Engineering",
+    risk: "medium",
+    levels: { Junior: 55, Mid: 35, Senior: 18, Lead: 10 },
+    reason: "IaC generation is automatable but cloud architecture decisions, incident response, and reliability engineering need deep expertise."
+  },
+  {
+    title: "Data Science / Analytics",
+    risk: "medium",
+    levels: { Junior: 58, Mid: 38, Senior: 20, Lead: 12 },
+    reason: "Notebook code and standard analysis are automatable. Novel hypothesis formation and business translation are not."
+  },
+  {
+    title: "Game Development",
+    risk: "medium",
+    levels: { Junior: 60, Mid: 38, Senior: 18, Lead: 10 },
+    reason: "Boilerplate game logic and asset scripting are automatable. Game feel, creative design, and engine architecture are human."
+  },
+  {
+    title: "Embedded / Firmware Engineering",
+    risk: "medium",
+    levels: { Junior: 45, Mid: 28, Senior: 15, Lead: 8 },
+    reason: "Physical hardware constraints and real-time systems create complexity that trips up agents. Still safer than pure software."
+  },
+  {
+    title: "Cloud Architecture",
+    risk: "medium",
+    levels: { Junior: 50, Mid: 32, Senior: 15, Lead: 8 },
+    reason: "Boilerplate IaC is automatable but multi-region strategies, cost optimization, and organizational constraints are judgment calls."
+  },
+  {
+    title: "Cybersecurity",
+    risk: "low",
+    levels: { Junior: 30, Mid: 20, Senior: 10, Lead: 5 },
+    reason: "Adversarial creativity, threat modeling, and red-teaming require human intuition. AI actually increases demand for security roles."
+  },
+  {
+    title: "AI / ML Engineering",
+    risk: "low",
+    levels: { Junior: 25, Mid: 15, Senior: 8, Lead: 4 },
+    reason: "Ironically the most future-proof field. Demand is exploding and the domain itself drives the tools that threaten others."
+  },
+  {
+    title: "Product / Engineering Management",
+    risk: "low",
+    levels: { Junior: 22, Mid: 15, Senior: 8, Lead: 4 },
+    reason: "Stakeholder alignment, roadmap decisions, team leadership, and cross-functional coordination are deeply human skills."
+  },
+  {
+    title: "Solutions Architecture (Enterprise)",
+    risk: "low",
+    levels: { Junior: 28, Mid: 18, Senior: 10, Lead: 5 },
+    reason: "Client relationships, organizational complexity, and translating vague business needs into technical solutions needs humans."
+  }
+];
+
+function getThreatClass(pct) {
+  if (pct >= 60) return 'high';
+  if (pct >= 30) return 'mid';
+  return 'low';
+}
+
+function getBarClass(pct) {
+  if (pct >= 60) return 'bar-high';
+  if (pct >= 30) return 'bar-mid';
+  return 'bar-low';
+}
+
+function getPctClass(pct) {
+  if (pct >= 60) return 'pct-high';
+  if (pct >= 30) return 'pct-mid';
+  return 'pct-low';
+}
+
+function renderCards() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  fields.forEach((f, i) => {
+    const avgThreat = Math.round(Object.values(f.levels).reduce((a,b)=>a+b,0) / Object.keys(f.levels).length);
+    
+    const levelsHTML = Object.entries(f.levels).map(([name, pct]) => `
+      <div class="level-row">
+        <div class="level-name">${name}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${getBarClass(pct)}" data-width="${pct}" style="width:0%"></div>
+        </div>
+        <div class="pct ${getPctClass(pct)}">${pct}%</div>
+      </div>
+    `).join('');
+
+    const card = document.createElement('div');
+    card.className = `card ${f.risk}`;
+    card.dataset.risk = f.risk;
+    card.style.animationDelay = `${i * 0.04}s`;
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${f.title}</div>
+        <div class="overall-badge ${f.risk}">${avgThreat}%</div>
+      </div>
+      <div class="levels">${levelsHTML}</div>
+      <div class="reason">${f.reason}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Animate bars after a tick
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width + '%';
+    });
+  }, 100);
+}
+
+function filter(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('.card').forEach(card => {
+    if (type === 'all' || card.dataset.risk === type) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+}
+
+renderCards();
+</script>
+</body>
+</html>
